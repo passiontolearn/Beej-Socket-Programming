@@ -1,19 +1,45 @@
+/*
+**  Header Files
+*/
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+
+/*
+**  Functions
+*/
+
+int		getaddrinfo(const char *node, const char *service,
+						const struct addrinfo *hints,
+						const struct addrinfo *res);
+int		socket(int domain, int type, int protocol);
+int		bind(int sockfd, struct sockaddr *my_addr, int addrlen);
+int		connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
+int		listen(int sockfd, int backlog);
+int		accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int		send(int sockfd, const void *msg, int len, int flags);
+int		recv(int sockfd, void *buf, int len, int flags);
+
+/*
+**  Beej's Notes
+*/
 
 int		getaddrinfo(const char *node,		// "www.example.com" or IP
 				const char *service,	// "http" or port number
 				const struct addrinfo *hints,
 				struct addrinfo **res);
 
-// sample call if you're a server who wants to listen on your host's IP address, port 3490
+/*
+**  Sample code if you're a SERVER who wants to listen on your host's IP
+**  address, port 3490
+*/
 
 int					status;
 struct addrinfo		hints;
 struct addrinfo		*servinfo;	// will point to the results
 
-memset(&hints, 0, sizeof(hints));
+bzero(&hints, sizeof(hints));
 hints.ai_family = AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;	// tcp stream sockets
 hints.ai_flags = AI_PASSIVE;		// fill in my IP for me
@@ -30,20 +56,23 @@ if ((status = getaddrinfo(NULL, "3490", &hints, &servinfo)))
 
 freeaddrinfo(servinfo);
 
-// sample call if you're a client who wants to connect to a particular server on port 3490
+/*
+**  Sample code if you're a CLIENT who wants to connect to a
+**  particular server on port 3490
+*/
 
 int					status;
 struct addrinfo		hints;
 struct addrinfo		*servinfo;
 
-memset(&hints, 0, sizeof(hints));
+bzero(&hints, sizeof(hints));
 hints.ai_family =  AF_UNSPEC;
 hints.ai_socktype = SOCK_STREAM;
 
-//  get ready to connect
+// get ready to connect
 status = getaddrinfo("www.example.net", "3490", &hints, &servinfo);
 
-//  servinfo now points to a linked list of 1 or more struct addrinfos
+// servinfo now points to a linked list of 1 or more struct addrinfos
 
 int		socket(int domain, int type, int protocol);	// returns a socket descriptor
 
@@ -60,7 +89,10 @@ s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 
 int		bind(int sockfd, struct sockaddr *my_addr, int addrlen);
 
-//  Here is an example that binds the socket to the host the program is running on
+/*
+**  Here is an example code that binds the socket to the host the program
+**  is running on
+*/
 
 int		sockfd;
 
@@ -77,7 +109,9 @@ bind(sockfd, res->ai_addr, res->ai_addrlen);
 
 int		connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
 
-//  Here's an example where we make a socket connection to www.example.com
+/*
+**  Here's example code where we make a socket connection to www.example.com
+*/
 
 int				sockfd;
 struct addrinfo hints, *res;
@@ -95,21 +129,23 @@ connect(sockfd, res->ai_addr, res->ai_addrlen);
 // Notice we didn't call bind, since the kernel will choose a local port
 // for us and the site we connect to will automatically get this from us
 
-//  What do you do when you want to wait for incoming connections and
-//  handle them some way? The process is shown below
+/*
+**  What do you do when you want to wait for incoming connections and
+**  handle them some way? The process is shown below
+*/
 
 int		listen(int sockfd, int backlog);	// backlog is the number of connections allowed in the queue
 
-//  Need to call bind() so that the server can run on a specific port
+// Need to call bind() so that the server can run on a specific port
 
 getaddrinfo();
 socket();
 bind();
 listen();
-//  accept() goes here
+// accept() goes here
 
-//  When you accept a client connection, the syscall returns a new socket file descriptor for send()
-//  and recv()
+// When you accept a client connection, the syscall returns a new socket file descriptor for send()
+// and recv()
 
 int		accept(int sockfd,	// The listening socket descriptor
 				struct sockaddr *addr,  // Where info about the incoming connection is stored
